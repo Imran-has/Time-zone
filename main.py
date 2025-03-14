@@ -1,7 +1,7 @@
 # Import required libraries
 import streamlit as st
 from datetime import datetime
-from zoneinfo import ZoneInfo
+import pytz
 
 # List of available time zones
 TIME_ZONES = [
@@ -29,7 +29,7 @@ selected_timezone = st.multiselect(
 st.subheader("Selected Timezones")
 for tz in selected_timezone:
     # Get and format current time for each selected timezone with AM/PM
-    current_time = datetime.now(ZoneInfo(tz)).strftime("%Y-%m-%d %I:%M:%S %p")
+    current_time = datetime.now(pytz.timezone(tz)).strftime("%Y-%m-%d %I:%M:%S %p")
     # Display timezone and its current time
     st.write(f"**{tz}**: {current_time}")
 
@@ -45,8 +45,9 @@ to_tz = st.selectbox("To Timezone", TIME_ZONES, index=1)
 # Create convert button and handle conversion
 if st.button("Convert Time"):
     # Combine today's date with input time and source timezone
-    dt = datetime.combine(datetime.today(), current_time, tzinfo=ZoneInfo(from_tz))
+    dt = datetime.combine(datetime.today(), current_time)
+    dt = pytz.timezone(from_tz).localize(dt)
     # Convert time to target timezone and format it with AM/PM
-    converted_time = dt.astimezone(ZoneInfo(to_tz)).strftime("%Y-%m-%d %I:%M:%S %p")
+    converted_time = dt.astimezone(pytz.timezone(to_tz)).strftime("%Y-%m-%d %I:%M:%S %p")
     # Display the converted time with success message
     st.success(f"Converted Time in {to_tz}: {converted_time}")
